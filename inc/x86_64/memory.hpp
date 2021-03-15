@@ -61,6 +61,4 @@
 #define MMAP_GLB_PCIS   0xffffff8000000000      // 511 000 000 000  256G (1024 PCI Segment Groups)
 #define BASE_ADDR       0xffffff8000000000      // 511 000 000 000
 
-#define USER_ADDR       0x00007ffffffff000
-
 #define OFFSET          (LINK_ADDR - LOAD_ADDR)
