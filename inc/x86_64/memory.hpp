@@ -57,7 +57,7 @@
 #define MMAP_GLB_APIC   0xffffffffbd000000      // 511 510 488 000   16M
 #define MMAP_GLB_UART   0xffffffffbc000000      // 511 510 480 000   16M
 #define MMAP_GLB_SMMU   0xffffffffb8000000      // 511 510 448 000   64M
-#define LINK_ADDR       0xffffffff81000000
+#define LINK_ADDR       0xffffffff80000000      // 511 510 000 000  896M
 
 #define MMAP_GLB_CPUS   0xffffffff40000000      // 511 509 000 000    1G (262144 CPUs)
 #define MMAP_GLB_PCIE   0xffffffc000000000      // 511 256 000 000
