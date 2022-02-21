@@ -51,6 +51,20 @@ extern "C" uintptr_t kern_ptab_setup (apic_t t)
     // Allocate and map kernel intr stack
     hptp.update (MMAP_CPU_ISTB, Kmem::ptr_to_phys (Buddy::alloc (0, Buddy::Fill::BITS0)), 0, Paging::Permissions (Paging::G | Paging::W | Paging::R), Memattr::ram());
 
+#if defined(__CET__) && (__CET__ & 2)
+    // Allocate and map kernel data shadow stack
+    auto const dshb { static_cast<uintptr_t *>(Buddy::alloc (0, Buddy::Fill::BITS0)) };
+    hptp.update (MMAP_CPU_DSHB, Kmem::ptr_to_phys (dshb), 0, Paging::Permissions (Paging::SS | Paging::G | Paging::R), Memattr::ram());
+
+    // Allocate and map kernel intr shadow stack
+    auto const ishb { static_cast<uintptr_t *>(Buddy::alloc (0, Buddy::Fill::BITS0)) };
+    hptp.update (MMAP_CPU_ISHB, Kmem::ptr_to_phys (ishb), 0, Paging::Permissions (Paging::SS | Paging::G | Paging::R), Memattr::ram());
+
+    // Install supervisor shadow stack tokens
+    dshb[PAGE_SIZE (0) / sizeof (uintptr_t) - 1] = MMAP_CPU_DSHT;
+    ishb[PAGE_SIZE (0) / sizeof (uintptr_t) - 1] = MMAP_CPU_ISHT;
+#endif
+
     return hptp.root_addr();
 }
 
