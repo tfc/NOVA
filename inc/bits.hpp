@@ -45,38 +45,20 @@ static constexpr int bit_scan_msb (unsigned long v)
  * Compute the largest order under size and alignment constraints
  *
  * @param size  Must be non-zero and >= 2^o
- * @param addr  Must be a multiple of 2^o
- * @return      The largest o that satisfies the above constraints
- */
-static constexpr unsigned aligned_order (size_t size, uintptr_t addr)
-{
-    auto o { bit_scan_msb (size) };
-
-    if (EXPECT_TRUE (addr))
-        o = min (o, bit_scan_lsb (addr));
-
-    return o;
-}
-
-/*
- * Compute the largest order under size and alignment constraints
- *
- * @param size  Must be non-zero and >= 2^o
  * @param addr1 Must be a multiple of 2^o
  * @param addr2 Must be a multiple of 2^o
+ * @param addrN Must be a multiple of 2^o
  * @return      The largest o that satisfies the above constraints
  */
-static constexpr unsigned aligned_order (size_t size, uintptr_t addr1, uintptr_t addr2)
+template<typename... Args>
+static constexpr unsigned aligned_order (size_t size, Args...addrs)
 {
-    auto o { bit_scan_msb (size) };
+    constexpr unsigned max_bit {1ull << (8 * sizeof(max_bit) - 1)};
 
-    if (EXPECT_TRUE (addr1))
-        o = min (o, bit_scan_lsb (addr1));
+    unsigned maximum_order = bit_scan_msb (size);
+    unsigned minimum_order = bit_scan_lsb(max_bit | (unsigned(addrs) | ... ));
 
-    if (EXPECT_TRUE (addr2))
-        o = min (o, bit_scan_lsb (addr2));
-
-    return o;
+    return min(maximum_order, minimum_order);
 }
 
 ALWAYS_INLINE
@@ -98,3 +80,13 @@ static_assert (bit_scan_lsb (0) == -1);
 static_assert (bit_scan_msb (0) == -1);
 static_assert (bit_scan_lsb (BIT64_RANGE (55, 5)) == 5);
 static_assert (bit_scan_msb (BIT64_RANGE (55, 5)) == 55);
+static_assert (aligned_order(8, 0) == 3);
+static_assert (aligned_order(8, 2) == 1);
+static_assert (aligned_order(8, 4) == 2);
+static_assert (aligned_order(8, 8) == 3);
+static_assert (aligned_order(8, 0, 2) == 1);
+static_assert (aligned_order(8, 0, 4) == 2);
+static_assert (aligned_order(8, 0, 8) == 3);
+static_assert (aligned_order(8, 0, 2, 4) == 1);
+static_assert (aligned_order(8, 0, 4, 8) == 2);
+static_assert (aligned_order(8, 0, 8, 16) == 3);
